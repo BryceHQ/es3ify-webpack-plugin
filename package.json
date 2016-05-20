@@ -1,0 +1,28 @@
+{
+  "name": "es3ify-webpack-plugin",
+  "version": "0.0.0",
+  "description": "a webpack plugin to es3ify your code for old versions of ie, such as ie8.",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/brycehq/es3ify-webpack-plugin.git"
+  },
+  "scripts": {},
+  "keywords": [
+    "webpack",
+    "plugin",
+    "es3ify",
+    "ie8"
+  ],
+  "author": "bryce <brycezero@163.com> (https://github.com/brycehq)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/brycehq/es3ify-webpack-plugin/issues"
+  },
+  "homepage": "https://github.com/brycehq/es3ify-webpack-plugin",
+  "dependencies": {
+    "es3ify": "^0.2.2",
+    "source-map": "^0.5.6",
+    "webpack-sources": "^0.1.2"
+  }
+}
