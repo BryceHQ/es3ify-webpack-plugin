@@ -8,7 +8,7 @@ I am new to webpack and babel. And I need to support ie8, but I didn't find a so
 ### Usage
 
 ```
-npm install es3ify-webpack-plugin
+npm install es3ify-webpack-plugin --save-dev
 ```
 Then in webpack.config.js
 
