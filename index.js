@@ -1,6 +1,7 @@
 var SourceMapConsumer = require("source-map").SourceMapConsumer;
 var SourceMapSource = require("webpack-sources").SourceMapSource;
 var RawSource = require("webpack-sources").RawSource;
+var ModuleFilenameHelpers = require("webpack/lib/ModuleFilenameHelpers");
 
 var transform = require('es3ify').transform;
 
@@ -34,7 +35,7 @@ Es3ifyPlugin.prototype.apply = function(compiler) {
 			compilation.additionalChunkAssets.forEach(function(file) {
 				files.push(file);
 			});
-			// files = files.filter(ModuleFilenameHelpers.matchObject.bind(undefined, options));
+			files = files.filter(ModuleFilenameHelpers.matchObject.bind(undefined, options));
 			files.forEach(function(file) {
 				try {
 					var asset = compilation.assets[file];
