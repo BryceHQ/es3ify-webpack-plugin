@@ -1,5 +1,7 @@
 es3ify-webpack-plugin
 =====================
+[es3ify-loader](https://github.com/sorrycc/es3ify-loader) is better. You should use it.
+
 
 A simple webpack plugin to es3ify your code for old versions of ie, such as ie8.
 
