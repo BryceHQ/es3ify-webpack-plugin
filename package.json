@@ -1,6 +1,6 @@
 {
   "name": "es3ify-webpack-plugin",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "a webpack plugin to es3ify your code for old versions of ie, such as ie8.",
   "main": "index.js",
   "repository": {
