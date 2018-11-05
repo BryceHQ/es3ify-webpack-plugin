@@ -24,14 +24,14 @@ Es3ifyPlugin.prototype.apply = function (compiler) {
 			if (options.sourceMap !== false) {
 				compilation.hooks.buildModule.tap(name, buildModuleHook);
 			}
-			compilation.hooks.optimizeChunkAssets.tapAsync(name, optimizeChunkAssetsHook);
+			compilation.hooks.optimizeChunkAssets.tapAsync(name, optimizeChunkAssetsHook(compilation));
 		});
 	} else {
 		compiler.plugin("compilation", function (compilation) {
 			if (options.sourceMap !== false) {
 				compilation.plugin("build-module", buildModuleHook);
 			}
-			compilation.plugin("optimize-chunk-assets", optimizeChunkAssetsHook);
+			compilation.plugin("optimize-chunk-assets", optimizeChunkAssetsHook(compilation));
 		});
 	}
 
@@ -40,51 +40,53 @@ Es3ifyPlugin.prototype.apply = function (compiler) {
 		module.useSourceMap = true;
 	}
 
-	function optimizeChunkAssetsHook(chunks, callback) {
-		var files = [];
-		chunks.forEach(function (chunk) {
-			chunk.files.forEach(function (file) {
+	function optimizeChunkAssetsHook(compilation) {
+		return function (chunks, callback) {
+			var files = [];
+			chunks.forEach(function (chunk) {
+				chunk.files.forEach(function (file) {
+					files.push(file);
+				});
+			});
+			compilation.additionalChunkAssets.forEach(function (file) {
 				files.push(file);
 			});
-		});
-		compilation.additionalChunkAssets.forEach(function (file) {
-			files.push(file);
-		});
-		files = files.filter(ModuleFilenameHelpers.matchObject.bind(undefined, options));
-		files.forEach(function (file) {
-			try {
-				var asset = compilation.assets[file];
-				var inputSourceMap, input;
-				if (options.sourceMap !== false) {
-					if (asset.sourceAndMap) {
-						var sourceAndMap = asset.sourceAndMap();
-						inputSourceMap = sourceAndMap.map;
-						input = sourceAndMap.source;
+			files = files.filter(ModuleFilenameHelpers.matchObject.bind(undefined, options));
+			files.forEach(function (file) {
+				try {
+					var asset = compilation.assets[file];
+					var inputSourceMap, input;
+					if (options.sourceMap !== false) {
+						if (asset.sourceAndMap) {
+							var sourceAndMap = asset.sourceAndMap();
+							inputSourceMap = sourceAndMap.map;
+							input = sourceAndMap.source;
+						} else {
+							inputSourceMap = asset.map();
+							input = asset.source();
+						}
+						var sourceMap = new SourceMapConsumer(inputSourceMap);
 					} else {
-						inputSourceMap = asset.map();
 						input = asset.source();
 					}
-					var sourceMap = new SourceMapConsumer(inputSourceMap);
-				} else {
-					input = asset.source();
+					var map;
+					if (options.sourceMap !== false) {
+						map = inputSourceMap;
+					}
+					var stream = transform(input);
+					compilation.assets[file] = (map ?
+						new SourceMapSource(stream, file, map, input, inputSourceMap) :
+						new RawSource(stream));
+				} catch (err) {
+					if (err.line) {
+						compilation.errors.push(new Error(file + " from es3ify\n" + err.message + " [" + file + ":" + err.line + "," + err.col + "]"));
+					} else if (err.msg) {
+						compilation.errors.push(new Error(file + " from es3ify\n" + err.msg));
+					} else
+						compilation.errors.push(new Error(file + " from es3ify\n" + err.stack));
 				}
-				var map;
-				if (options.sourceMap !== false) {
-					map = inputSourceMap;
-				}
-				var stream = transform(input);
-				compilation.assets[file] = (map ?
-					new SourceMapSource(stream, file, map, input, inputSourceMap) :
-					new RawSource(stream));
-			} catch (err) {
-				if (err.line) {
-					compilation.errors.push(new Error(file + " from es3ify\n" + err.message + " [" + file + ":" + err.line + "," + err.col + "]"));
-				} else if (err.msg) {
-					compilation.errors.push(new Error(file + " from es3ify\n" + err.msg));
-				} else
-					compilation.errors.push(new Error(file + " from es3ify\n" + err.stack));
-			}
-		});
-		callback();
+			});
+			callback();
+		}
 	}
 };
